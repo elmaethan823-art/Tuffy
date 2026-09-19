@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurable Sandbox & CardGenr Hub (Repaired)</title>
+    <title>Live API Execution Hub</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
         body { background-color: #0b0b0b; color: #00ff66; padding: 20px; }
@@ -24,28 +24,31 @@
 </head>
 <body>
     <div class="container">
-        <h1>Global Configuration Hub</h1>
+        <h1>Global Execution Parameters</h1>
         <div class="config-banner">
             <div class="grid" style="margin-bottom:0;">
                 <div class="form-group">
-                    <label for="globalMoneyAmount">Global Target Money ($)</label>
+                    <label for="globalMoneyAmount">Target Amount ($)</label>
                     <input type="number" id="globalMoneyAmount" value="300.00" step="0.01">
                 </div>
                 <div class="form-group">
-                    <label for="globalCurrency">Currency Code</label>
-                    <input type="text" id="globalCurrency" value="USD">
+                    <label for="corsMode">CORS Bypass Proxy</label>
+                    <select id="corsMode">
+                        <option value="none">Direct Fetch (Standard)</option>
+                        <option value="proxy">Public CORS Proxy Bridge</option>
+                    </select>
                 </div>
             </div>
         </div>
 
-        <h1>CardGenr v1 Core API Interface</h1>
+        <h1>CardGenr v1 Live Execution Hub</h1>
         <div class="info-panel">
-            <span>ENDPOINT: https://cardgenr.com/api/v1</span>
-            <span>STATUS: AUTO-FALLBACK ENABLED</span>
+            <span>TARGET: https://cardgenr.com/api/v1</span>
+            <span>STATUS: LIVE EXECUTION</span>
         </div>
         <div class="grid">
             <div class="form-group full-width">
-                <label for="cardgenrEndpoint">Base API v1 Action / Route</label>
+                <label for="cardgenrEndpoint">API Route</label>
                 <select id="cardgenrEndpoint">
                     <option value="https://cardgenr.com/api/v1">API Root Overview</option>
                     <option value="https://cardgenr.com/api/v1/generate">Card Generation Stream</option>
@@ -65,10 +68,10 @@
                 <input type="number" id="count" value="1" min="1" max="1000">
             </div>
         </div>
-        <button id="execCardgenrBtn">Execute CardGenr Request</button>
+        <button id="execCardgenrBtn">Execute Live CardGenr API Request</button>
         <div class="output-box">
-            <label>CardGenr Response Stream:</label>
-            <pre id="cardgenrOutput">Awaiting execution...</pre>
+            <label>Live API Response Stream:</label>
+            <pre id="cardgenrOutput">Awaiting live execution...</pre>
         </div>
     </div>
 
@@ -76,7 +79,7 @@
         <h1>Virtual Bank Sandbox Hub (virtual-bank.onrender.com)</h1>
         <div class="info-panel">
             <span>BASE: http://virtual-bank.onrender.com/</span>
-            <span>STATUS: AUTO-FALLBACK ENABLED</span>
+            <span>STATUS: LIVE EXECUTION</span>
         </div>
         <div class="grid">
             <div class="form-group full-width">
@@ -97,14 +100,14 @@
                 <input type="text" id="virtualToken" placeholder="Optional token if required">
             </div>
             <div class="form-group">
-                <label for="payloadInject">Payload Data (Auto-Filled)</label>
+                <label for="payloadInject">Payload Data (JSON)</label>
                 <input type="text" id="payloadInject" placeholder='{"amount": 300.00}' value='{"amount": 300.00}'>
             </div>
         </div>
-        <button id="execVirtualBtn" style="background:#00ffee; color:#0b0b0b;">Dispatch Virtual Sandbox Request</button>
+        <button id="execVirtualBtn" style="background:#00ffee; color:#0b0b0b;">Dispatch Live Virtual Bank API Request</button>
         <div class="output-box">
-            <label>Virtual Bank Response Stream:</label>
-            <pre id="virtualOutput">Awaiting virtual sandbox dispatch...</pre>
+            <label>Live Virtual Bank Response Stream:</label>
+            <pre id="virtualOutput">Awaiting live API dispatch...</pre>
         </div>
     </div>
 
@@ -120,59 +123,51 @@
             }
         });
 
+        function buildTargetUrl(rawUrl) {
+            const proxyMode = document.getElementById('corsMode').value;
+            if (proxyMode === 'proxy') {
+                return `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
+            }
+            return rawUrl;
+        }
+
         document.getElementById('execCardgenrBtn').addEventListener('click', async () => {
             const baseRoute = document.getElementById('cardgenrEndpoint').value;
             const type = document.getElementById('cardType').value;
             const count = parseInt(document.getElementById('count').value) || 1;
             const money = parseFloat(document.getElementById('globalMoneyAmount').value) || 300.00;
-            const currency = document.getElementById('globalCurrency').value;
             const output = document.getElementById('cardgenrOutput');
 
             let targetUrl = baseRoute;
             if (baseRoute.includes('generate')) {
-                targetUrl += `?type=${encodeURIComponent(type)}&count=${encodeURIComponent(count)}&balance=${encodeURIComponent(money)}&currency=${encodeURIComponent(currency)}`;
+                targetUrl += `?type=${encodeURIComponent(type)}&count=${encodeURIComponent(count)}&balance=${encodeURIComponent(money)}`;
             }
 
-            output.textContent = `[*] Scurrying to ${targetUrl}...\n`;
+            const finalFetchUrl = buildTargetUrl(targetUrl);
+            output.textContent = `[*] Executing live request to: ${targetUrl}\n`;
 
             try {
-                const response = await fetch(targetUrl, { method: 'GET', headers: { 'Accept': 'application/json' }, mode: 'cors' });
+                const response = await fetch(finalFetchUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
                 const rawText = await response.text();
-                const parsed = JSON.parse(rawText);
-                output.textContent = JSON.stringify(parsed, null, 2);
-                updatePayloadInjector(parsed, money);
-            } catch (err) {
-                // CORS / Network fallback simulation layer
-                console.warn('[*] Live fetch blocked by CORS/Network. Switching to local sandbox simulation payload.');
-                let simulatedCards = [];
-                for(let i=0; i<count; i++) {
-                    simulatedCards.push({
-                        id: 'CARD-' + Math.floor(Math.random() * 900000 + 100000),
-                        type: type.toUpperCase(),
-                        number: '4' + Math.floor(Math.random() * 899999999999999 + 100000000000000),
-                        exp: '12/28',
-                        cvv: Math.floor(Math.random() * 900 + 100),
-                        balance: money,
-                        currency: currency,
-                        status: 'SIMULATED_ACTIVE'
-                    });
+                try {
+                    const parsed = JSON.parse(rawText);
+                    output.textContent = JSON.stringify(parsed, null, 2);
+                    
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        let payloadObj = typeof parsed[0] === 'object' ? parsed[0] : { card: parsed[0] };
+                        payloadObj.amount = money;
+                        document.getElementById('payloadInject').value = JSON.stringify(payloadObj);
+                    } else if (typeof parsed === 'object') {
+                        parsed.amount = money;
+                        document.getElementById('payloadInject').value = JSON.stringify(parsed);
+                    }
+                } catch {
+                    output.textContent = rawText;
                 }
-                output.textContent = `[!] Note: Direct browser fetch blocked by CORS policy. Loaded via Sandbox Local Fallback Engine:\n\n` + JSON.stringify(simulatedCards, null, 2);
-                updatePayloadInjector(simulatedCards, money);
+            } catch (err) {
+                output.textContent = `[!] Execution Error: ${err.message}\n(Hint: Switch CORS Bypass Proxy to 'Public CORS Proxy Bridge' if network blocks direct socket access.)`;
             }
         });
-
-        function updatePayloadInjector(data, money) {
-            if (Array.isArray(data) && data.length > 0) {
-                let payloadObj = typeof data[0] === 'object' ? data[0] : { card: data[0] };
-                payloadObj.amount = money;
-                document.getElementById('payloadInject').value = JSON.stringify(payloadObj);
-            } else {
-                let payloadObj = typeof data === 'object' ? data : { data: data };
-                payloadObj.amount = money;
-                document.getElementById('payloadInject').value = JSON.stringify(payloadObj);
-            }
-        }
 
         document.getElementById('execVirtualBtn').addEventListener('click', async () => {
             const endpoint = document.getElementById('virtualEndpoint').value;
@@ -180,13 +175,14 @@
             const payload = document.getElementById('payloadInject').value;
             const output = document.getElementById('virtualOutput');
 
-            output.textContent = `[*] Scurrying payload to ${endpoint}...\n`;
+            const finalFetchUrl = buildTargetUrl(endpoint);
+            output.textContent = `[*] Executing live request to: ${endpoint}\n`;
 
             try {
                 const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
                 if (token) headers['Authorization'] = `Bearer ${token}`;
 
-                const options = { method: 'GET', headers, mode: 'cors' };
+                const options = { method: 'GET', headers };
                 if (endpoint.includes('create') || endpoint.includes('payment') || endpoint.includes('login')) {
                     options.method = 'POST';
                     if (payload && payload !== '{}') {
@@ -194,21 +190,16 @@
                     }
                 }
 
-                const response = await fetch(endpoint, options);
+                const response = await fetch(finalFetchUrl, options);
                 const rawText = await response.text();
-                const parsed = JSON.parse(rawText);
-                output.textContent = JSON.stringify(parsed, null, 2);
+                try {
+                    const parsed = JSON.parse(rawText);
+                    output.textContent = JSON.stringify(parsed, null, 2);
+                } catch {
+                    output.textContent = rawText;
+                }
             } catch (err) {
-                console.warn('[*] Live virtual bank fetch blocked by CORS. Running sandbox response simulation.');
-                let simulatedResponse = {
-                    status: 'success',
-                    code: 200,
-                    endpoint: endpoint,
-                    message: 'Virtual sandbox endpoint acknowledged request via local fallback handler.',
-                    timestamp: new Date().toISOString(),
-                    receivedPayload: JSON.parse(payload || '{}')
-                };
-                output.textContent = `[!] Note: Direct browser fetch blocked by CORS policy. Loaded via Virtual Sandbox Fallback Engine:\n\n` + JSON.stringify(simulatedResponse, null, 2);
+                output.textContent = `[!] Execution Error: ${err.message}\n(Hint: Switch CORS Bypass Proxy to 'Public CORS Proxy Bridge' if network blocks direct socket access.)`;
             }
         });
     </script>
