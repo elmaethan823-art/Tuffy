@@ -3,32 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CardGenr & Bank Sandbox Gateway</title>
+    <title>Fully Configurable Sandbox & CardGenr Hub</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
         body { background-color: #0b0b0b; color: #00ff66; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; border: 1px solid #00ff66; padding: 20px; background: #111; box-shadow: 0 0 20px rgba(0,255,102,0.15); margin-bottom: 20px; }
+        .container { max-width: 950px; margin: 0 auto 20px auto; border: 1px solid #00ff66; padding: 20px; background: #111; box-shadow: 0 0 20px rgba(0,255,102,0.15); }
         h1 { text-align: center; margin-bottom: 20px; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 2px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .form-group { margin-bottom: 15px; }
+        .full-width { grid-column: span 2; }
         label { display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; background: #181818; border: 1px solid #00ff66; color: #00ff66; font-size: 0.95rem; }
         button { width: 100%; padding: 12px; background: #00ff66; border: none; color: #0b0b0b; font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.15s; }
         button:hover { background: #00cc52; box-shadow: 0 0 10px #00ff66; }
         .output-box { margin-top: 20px; }
-        pre { background: #050505; padding: 15px; border: 1px dashed #00ff66; max-height: 250px; overflow-y: auto; white-space: pre-wrap; font-size: 0.8rem; color: #33ff88; }
+        pre { background: #050505; padding: 15px; border: 1px dashed #00ff66; max-height: 220px; overflow-y: auto; white-space: pre-wrap; font-size: 0.8rem; color: #33ff88; }
         .info-panel { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 10px; color: #888; border-bottom: 1px solid #222; padding-bottom: 5px; }
-        hr { border: 0; border-top: 1px solid #222; margin: 20px 0; }
+        .config-banner { background: #161616; border: 1px solid #00ff66; padding: 10px; margin-bottom: 20px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>CardGenr Cloud Interface ($300 Funded)</h1>
+        <h1>Global Configuration Hub</h1>
+        <div class="config-banner">
+            <div class="grid" style="margin-bottom:0;">
+                <div class="form-group">
+                    <label for="globalMoneyAmount">Global Target Money ($)</label>
+                    <input type="number" id="globalMoneyAmount" value="300.00" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="globalCurrency">Currency Code</label>
+                    <input type="text" id="globalCurrency" value="USD">
+                </div>
+            </div>
+        </div>
+
+        <h1>CardGenr v1 Core API Interface</h1>
         <div class="info-panel">
-            <span>HOST: GitHub Pages</span>
-            <span>TARGET: https://cardgenr.com/api/v1/generate</span>
+            <span>ENDPOINT: https://cardgenr.com/api/v1</span>
+            <span>STATUS: CONFIGURABLE</span>
         </div>
         <div class="grid">
+            <div class="form-group full-width">
+                <label for="cardgenrEndpoint">Base API v1 Action / Route</label>
+                <select id="cardgenrEndpoint">
+                    <option value="https://cardgenr.com/api/v1">API Root Overview</option>
+                    <option value="https://cardgenr.com/api/v1/generate">Card Generation Stream</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label for="cardType">Card Type</label>
                 <select id="cardType">
@@ -42,64 +64,77 @@
                 <label for="count">Quantity</label>
                 <input type="number" id="count" value="1" min="1" max="1000">
             </div>
-            <div class="form-group">
-                <label for="country">Country Code</label>
-                <input type="text" id="country" value="US">
-            </div>
-            <div class="form-group">
-                <label for="balance">Target Balance ($)</label>
-                <input type="text" id="balance" value="300.00" readonly>
-            </div>
         </div>
-        <button id="execCardBtn">Execute Funded Generation Request</button>
+        <button id="execCardgenrBtn">Execute Configured CardGenr Request</button>
         <div class="output-box">
-            <label>Card Output Stream:</label>
-            <pre id="cardOutput">Awaiting command execution...</pre>
+            <label>CardGenr Response Stream:</label>
+            <pre id="cardgenrOutput">Awaiting execution...</pre>
         </div>
     </div>
 
     <div class="container">
-        <h1>Bank Sandbox Gateway Connection</h1>
+        <h1>Virtual Bank Sandbox Hub (virtual-bank.onrender.com)</h1>
         <div class="info-panel">
-            <span>MODULE: Sandbox Bridge</span>
-            <span>STATUS: READY FOR HANDSHAKE</span>
+            <span>BASE: http://virtual-bank.onrender.com/</span>
+            <span>STATUS: FULLY CONFIGURABLE</span>
         </div>
         <div class="grid">
-            <div class="form-group">
-                <label for="bankName">Bank Name / Institution</label>
-                <input type="text" id="bankName" value="Sandbox National Bank">
+            <div class="form-group full-width">
+                <label for="virtualEndpoint">Select Virtual Bank Endpoint</label>
+                <select id="virtualEndpoint">
+                    <option value="http://virtual-bank.onrender.com/">API Overview</option>
+                    <option value="http://virtual-bank.onrender.com/auth/login/">User Login</option>
+                    <option value="http://virtual-bank.onrender.com/accounts/">Account List</option>
+                    <option value="http://virtual-bank.onrender.com/accounts/create/">Account Creation</option>
+                    <option value="http://virtual-bank.onrender.com/debit-cards/">Debit Card List</option>
+                    <option value="http://virtual-bank.onrender.com/debit-cards/payment/">Debit Card Payment</option>
+                    <option value="http://virtual-bank.onrender.com/deposits/create/">Deposit Creation</option>
+                    <option value="http://virtual-bank.onrender.com/transfers/create/">Transfer Creation</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="routingNumber">Routing Number</label>
-                <input type="text" id="routingNumber" placeholder="9-digit routing">
+                <label for="virtualToken">Auth Token (Bearer)</label>
+                <input type="text" id="virtualToken" placeholder="Optional token if required">
             </div>
             <div class="form-group">
-                <label for="accountNumber">Account Number</label>
-                <input type="text" id="accountNumber" placeholder="Account number">
-            </div>
-            <div class="form-group">
-                <label for="linkedCard">Card Reference ID</label>
-                <input type="text" id="linkedCard" placeholder="Paste generated card data here">
+                <label for="payloadInject">Payload Data (Auto-Filled with Money Config)</label>
+                <input type="text" id="payloadInject" placeholder='{"amount": 300.00}' value='{"amount": 300.00}'>
             </div>
         </div>
-        <button id="execBankBtn" style="background:#ff3366; color:#0b0b0b;">Initiate Bank Connection</button>
+        <button id="execVirtualBtn" style="background:#00ffee; color:#0b0b0b;">Dispatch Configured Virtual Sandbox Request</button>
         <div class="output-box">
-            <label>Bank Handshake Stream:</label>
-            <pre id="bankOutput">Awaiting bank synchronization...</pre>
+            <label>Virtual Bank Response Stream:</label>
+            <pre id="virtualOutput">Awaiting virtual sandbox dispatch...</pre>
         </div>
     </div>
 
     <script>
-        document.getElementById('execCardBtn').addEventListener('click', async () => {
+        // Sync global money amount changes to payload config automatically
+        document.getElementById('globalMoneyAmount').addEventListener('input', (e) => {
+            const val = e.target.value;
+            try {
+                let currentPayload = JSON.parse(document.getElementById('payloadInject').value || '{}');
+                currentPayload.amount = parseFloat(val) || 0;
+                document.getElementById('payloadInject').value = JSON.stringify(currentPayload);
+            } catch {
+                document.getElementById('payloadInject').value = JSON.stringify({ amount: parseFloat(val) || 0 });
+            }
+        });
+
+        document.getElementById('execCardgenrBtn').addEventListener('click', async () => {
+            const baseRoute = document.getElementById('cardgenrEndpoint').value;
             const type = document.getElementById('cardType').value;
             const count = document.getElementById('count').value;
-            const country = document.getElementById('country').value;
-            const balance = document.getElementById('balance').value;
-            const output = document.getElementById('cardOutput');
+            const money = document.getElementById('globalMoneyAmount').value;
+            const currency = document.getElementById('globalCurrency').value;
+            const output = document.getElementById('cardgenrOutput');
 
-            const targetUrl = `https://cardgenr.com/api/v1/generate?type=${encodeURIComponent(type)}&count=${encodeURIComponent(count)}&country=${encodeURIComponent(country)}&balance=${encodeURIComponent(balance)}`;
+            let targetUrl = baseRoute;
+            if (baseRoute.includes('generate')) {
+                targetUrl += `?type=${encodeURIComponent(type)}&count=${encodeURIComponent(count)}&balance=${encodeURIComponent(money)}&currency=${encodeURIComponent(currency)}`;
+            }
 
-            output.textContent = `[*] Scurrying to network endpoint with $${balance} parameter...\n`;
+            output.textContent = `[*] Scurrying to ${targetUrl} with configured amount $${money}...\n`;
 
             try {
                 const response = await fetch(targetUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
@@ -107,44 +142,54 @@
                 try {
                     const parsed = JSON.parse(rawText);
                     output.textContent = JSON.stringify(parsed, null, 2);
-                    // Automatically drop first card reference into bank section if available
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        document.getElementById('linkedCard').value = JSON.stringify(parsed[0]);
-                    } else if (parsed.card) {
-                        document.getElementById('linkedCard').value = JSON.stringify(parsed.card);
+                        let payloadObj = typeof parsed[0] === 'object' ? parsed[0] : { card: parsed[0] };
+                        payloadObj.amount = parseFloat(money);
+                        document.getElementById('payloadInject').value = JSON.stringify(payloadObj);
+                    } else {
+                        let payloadObj = typeof parsed === 'object' ? parsed : { data: parsed };
+                        payloadObj.amount = parseFloat(money);
+                        document.getElementById('payloadInject').value = JSON.stringify(payloadObj);
                     }
+                } catch {
+                    output.textContent = rawText;
+                    document.getElementById('payloadInject').value = JSON.stringify({ raw: rawText.slice(0, 100), amount: parseFloat(money) });
+                }
+            } catch (err) {
+                output.textContent = `[!] Network/CORS barrier encountered: ${err.message}\n(Tip: Ensure target allows cross-origin requests)`;
+            }
+        });
+
+        document.getElementById('execVirtualBtn').addEventListener('click', async () => {
+            const endpoint = document.getElementById('virtualEndpoint').value;
+            const token = document.getElementById('virtualToken').value;
+            const payload = document.getElementById('payloadInject').value;
+            const output = document.getElementById('virtualOutput');
+
+            output.textContent = `[*] Scurrying configured payload to ${endpoint}...\n`;
+
+            try {
+                const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const options = { method: 'GET', headers };
+                if (endpoint.includes('create') || endpoint.includes('payment') || endpoint.includes('login')) {
+                    options.method = 'POST';
+                    if (payload && payload !== '{}') {
+                        try { options.body = JSON.stringify(JSON.parse(payload)); } catch { options.body = payload; }
+                    }
+                }
+
+                const response = await fetch(endpoint, options);
+                const rawText = await response.text();
+                try {
+                    output.textContent = JSON.stringify(JSON.parse(rawText), null, 2);
                 } catch {
                     output.textContent = rawText;
                 }
             } catch (err) {
-                output.textContent = `[!] Network/CORS barrier encountered: ${err.message}\n(Tip: Ensure target allows cross-origin requests from github.io domain)`;
+                output.textContent = `[!] Virtual bank connection error: ${err.message}\n(Note: Verify direct browser execution permissions or CORS routing)`;
             }
-        });
-
-        document.getElementById('execBankBtn').addEventListener('click', () => {
-            const bankName = document.getElementById('bankName').value;
-            const routingNumber = document.getElementById('routingNumber').value;
-            const accountNumber = document.getElementById('accountNumber').value;
-            const linkedCard = document.getElementById('linkedCard').value;
-            const output = document.getElementById('bankOutput');
-
-            output.textContent = `[*] Connecting to ${bankName} sandbox bridge...\n[*] Verifying routing and account structures...`;
-
-            setTimeout(() => {
-                output.textContent = JSON.stringify({
-                    status: 'success',
-                    code: 200,
-                    message: 'Sandbox bank connection handshake completed.',
-                    transactionId: 'TXN-' + Math.floor(Math.random() * 1000000000),
-                    details: {
-                        bank: bankName,
-                        routing: routingNumber ? routingNumber.slice(0,3) + '******' : 'N/A',
-                        accountMasked: '****' + (accountNumber ? accountNumber.slice(-4) : '0000'),
-                        cardLinked: linkedCard ? true : false,
-                        status: 'VERIFIED_ACTIVE'
-                    }
-                }, null, 2);
-            }, 1200);
         });
     </script>
 </body>
